@@ -30,6 +30,7 @@
 #include <time.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/select.h>
 #include "rt.h"
 
 

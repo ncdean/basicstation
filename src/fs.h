@@ -29,6 +29,8 @@
 #ifndef _fs_h_
 #define _fs_h_
 
+#include <sys/stat.h>
+
 void  sys_eraseFlash (u4_t faddr, uint pagecnt);
 void  sys_writeFlash (u4_t faddr, u4_t* data, uint u4cnt);
 void  sys_readFlash  (u4_t faddr, u4_t* data, uint u4cnt);
