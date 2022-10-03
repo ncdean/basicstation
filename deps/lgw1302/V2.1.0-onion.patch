@@ -43,40 +43,8 @@ index 88e4530..1b83698 100644
  
  /* -------------------------------------------------------------------------- */
  /* --- PUBLIC FUNCTIONS PROTOTYPES ------------------------------------------ */
-diff --git a/libloragw/inc/loragw_stationlog.h b/libloragw/inc/loragw_stationlog.h
-new file mode 100644
-index 0000000..a282b8f
---- /dev/null
-+++ b/libloragw/inc/loragw_stationlog.h
-@@ -0,0 +1,26 @@
-+#ifndef _LORAGW_STATIONLOG_H
-+#define _LORAGW_STATIONLOG_H
-+
-+#if defined(STATIONLOG)
-+
-+#undef DEBUG_PRINTF
-+#undef DEBUG_MSG
-+
-+enum { XDEBUG=0, DEBUG, VERBOSE, INFO, NOTICE, WARNING, ERROR, CRITICAL };
-+extern void log_hal (uint8_t level, const char* fmt, ...);
-+#define ERROR_PRINTF(fmt, ...)     log_hal(ERROR  , "[%s:%d] "fmt, __FUNCTION__, __LINE__, ## __VA_ARGS__)
-+#define INFO_PRINTF(fmt, ...)      log_hal(INFO   , "[%s:%d] "fmt, __FUNCTION__, __LINE__, ## __VA_ARGS__)
-+#define DEBUG_PRINTF(fmt, ...)     log_hal(XDEBUG , "[%s:%d] "fmt, __FUNCTION__, __LINE__, ## __VA_ARGS__)
-+#define DEBUG_MSG(str)             log_hal(XDEBUG , "[%s:%d] %s", __FUNCTION__, __LINE__, str)
-+#define XDEBUG_PRINTF(fmt, ...)    log_hal(XDEBUG , "[%s:%d] "fmt, __FUNCTION__, __LINE__, ## __VA_ARGS__)
-+#define XDEBUG_MSG(str)            log_hal(XDEBUG , "[%s:%d] %s", __FUNCTION__, __LINE__, str)
-+
-+#else // !defined(STATIONLOG)
-+
-+#define ERROR_PRINTF(fmt, ...)     DEBUG_PRINTF(fmt, ## __VA_ARGS__)
-+#define INFO_PRINTF(fmt, ...)      DEBUG_PRINTF(fmt, ## __VA_ARGS__)
-+#define XDEBUG_PRINTF(fmt, ...)    DEBUG_PRINTF(fmt, ## __VA_ARGS__)
-+#define XDEBUG_MSG(str)            DEBUG_MSG(str)
-+#endif
-+
-+#endif
 diff --git a/libloragw/src/loragw_ad5338r.c b/libloragw/src/loragw_ad5338r.c
-index ea08513..6d1118c 100644
+index ea08513..9361217 100644
 --- a/libloragw/src/loragw_ad5338r.c
 +++ b/libloragw/src/loragw_ad5338r.c
 @@ -32,6 +32,8 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
@@ -87,6 +55,15 @@ index ea08513..6d1118c 100644
 +
  /* -------------------------------------------------------------------------- */
  /* --- PUBLIC FUNCTIONS DEFINITION ------------------------------------------ */
+ 
+@@ -43,7 +45,7 @@ int ad5338r_configure(int i2c_fd, uint8_t i2c_addr) {
+ 
+     /* Check Input Params */
+     if (i2c_fd <= 0) {
+-        printf("ERROR: invalid I2C file descriptor\n");
++        printf("ERROR: invalid I2C file descriptor PO\n");
+         return LGW_I2C_ERROR;
+     }
  
 diff --git a/libloragw/src/loragw_cal.c b/libloragw/src/loragw_cal.c
 index a3cfe2d..2644e7d 100644
@@ -274,7 +251,6 @@ index 9a81a08..2314e32 100644
      return 0; /* ignored */
  }
 +#endif
- 
 diff --git a/libloragw/src/loragw_hal.c b/libloragw/src/loragw_hal.c
 index ffc8ec0..770593b 100644
 --- a/libloragw/src/loragw_hal.c
@@ -980,6 +956,57 @@ index 94231b7..a90f8a2 100644
          return LGW_SPI_SUCCESS;
      }
  }
+diff --git a/libloragw/src/loragw_stts751.c b/libloragw/src/loragw_stts751.c
+index 7766961..df41812 100644
+--- a/libloragw/src/loragw_stts751.c
++++ b/libloragw/src/loragw_stts751.c
+@@ -78,12 +78,13 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
+ /* --- PUBLIC FUNCTIONS DEFINITION ------------------------------------------ */
+ 
+ int stts751_configure(int i2c_fd, uint8_t i2c_addr) {
++#if 0
+     int err;
+     uint8_t val;
+ 
+     /* Check Input Params */
+     if (i2c_fd <= 0) {
+-        printf("ERROR: invalid I2C file descriptor\n");
++        printf("ERROR: invalid I2C file descriptor PO1\n");
+         return LGW_I2C_ERROR;
+     }
+ 
+@@ -142,19 +143,21 @@ int stts751_configure(int i2c_fd, uint8_t i2c_addr) {
+         return LGW_I2C_ERROR;
+     }
+ 
++#endif
+     return LGW_I2C_SUCCESS;
+ }
+ 
+ /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+ 
+ int stts751_get_temperature(int i2c_fd, uint8_t i2c_addr, float * temperature) {
++#if 0
+     int err;
+     uint8_t high_byte, low_byte;
+     int8_t h;
+ 
+     /* Check Input Params */
+     if (i2c_fd <= 0) {
+-        printf("ERROR: invalid I2C file descriptor\n");
++        printf("ERROR: invalid I2C file descriptor PO2\n");
+         return LGW_I2C_ERROR;
+     }
+ 
+@@ -176,7 +179,7 @@ int stts751_get_temperature(int i2c_fd, uint8_t i2c_addr, float * temperature) {
+     *temperature = ((h << 8) | low_byte) / 256.0;
+ 
+     DEBUG_PRINTF("Temperature: %f C (h:0x%02X l:0x%02X)\n", *temperature, high_byte, low_byte);
+-
++#endif
+     return LGW_I2C_SUCCESS;
+ }
+ 
 diff --git a/libloragw/src/loragw_sx1302.c b/libloragw/src/loragw_sx1302.c
 index aa330cd..ab58109 100644
 --- a/libloragw/src/loragw_sx1302.c
@@ -2332,3 +2359,35 @@ index 4fe7e9a..b69f73c 100644
  
      *temperature = mcu_status.temperature;
  
+diff --git a/libloragw/inc/loragw_stationlog.h b/libloragw/inc/loragw_stationlog.h
+new file mode 100644
+index 0000000..a282b8f
+--- /dev/null
++++ b/libloragw/inc/loragw_stationlog.h
+@@ -0,0 +1,26 @@
++#ifndef _LORAGW_STATIONLOG_H
++#define _LORAGW_STATIONLOG_H
++
++#if defined(STATIONLOG)
++
++#undef DEBUG_PRINTF
++#undef DEBUG_MSG
++
++enum { XDEBUG=0, DEBUG, VERBOSE, INFO, NOTICE, WARNING, ERROR, CRITICAL };
++extern void log_hal (uint8_t level, const char* fmt, ...);
++#define ERROR_PRINTF(fmt, ...)     log_hal(ERROR  , "[%s:%d] "fmt, __FUNCTION__, __LINE__, ## __VA_ARGS__)
++#define INFO_PRINTF(fmt, ...)      log_hal(INFO   , "[%s:%d] "fmt, __FUNCTION__, __LINE__, ## __VA_ARGS__)
++#define DEBUG_PRINTF(fmt, ...)     log_hal(XDEBUG , "[%s:%d] "fmt, __FUNCTION__, __LINE__, ## __VA_ARGS__)
++#define DEBUG_MSG(str)             log_hal(XDEBUG , "[%s:%d] %s", __FUNCTION__, __LINE__, str)
++#define XDEBUG_PRINTF(fmt, ...)    log_hal(XDEBUG , "[%s:%d] "fmt, __FUNCTION__, __LINE__, ## __VA_ARGS__)
++#define XDEBUG_MSG(str)            log_hal(XDEBUG , "[%s:%d] %s", __FUNCTION__, __LINE__, str)
++
++#else // !defined(STATIONLOG)
++
++#define ERROR_PRINTF(fmt, ...)     DEBUG_PRINTF(fmt, ## __VA_ARGS__)
++#define INFO_PRINTF(fmt, ...)      DEBUG_PRINTF(fmt, ## __VA_ARGS__)
++#define XDEBUG_PRINTF(fmt, ...)    DEBUG_PRINTF(fmt, ## __VA_ARGS__)
++#define XDEBUG_MSG(str)            DEBUG_MSG(str)
++#endif
++
++#endif
